@@ -33,12 +33,17 @@ func main() {
 	}
 }
 
-func (*server) Chat(stream pb.ChatService_ChatServer) error {
+func (s *server) Chat(stream pb.ChatService_ChatServer) error {
 
 	for {
 		req, err := stream.Recv()
+		_, ok := s.clients[req.Name]
+		if ok == false {
 
-		fmt.Println(req)
+			fmt.Println(s.clients)
+
+		}
+		defer delete(s.clients, req.Name)
 
 		if err == io.EOF {
 			return nil
@@ -48,15 +53,20 @@ func (*server) Chat(stream pb.ChatService_ChatServer) error {
 			log.Fatalf("Error while reading the stream %v", err)
 		}
 
-		//First build Echo server
-		res := stream.Send(&pb.Message{
-			Name:    req.Name,
-			Message: req.Message,
-		})
+		for name, client := range s.clients {
+			responseMessage := &pb.Message{
+				Name:    req.Name,
+				Message: req.Message,
+			}
 
-		if res != nil {
-			log.Fatalf("Error when sending response from server %v", res)
+			var res error
+			if name != req.Name {
+				res = client.Send(responseMessage)
+			}
+
+			if res != nil {
+				log.Fatalf("Error when sending response from server %v", res)
+			}
 		}
 	}
-
 }
