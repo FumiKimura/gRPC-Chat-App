@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+option go_package = "github.com/FumiKimura/ccp2-project-polygottal/proto";
+
+service ChatService {
+    rpc Chat(stream Message) returns (stream Message){};
+}
+
+message Message {
+    string name = 1;
+    string message = 2;
+}
