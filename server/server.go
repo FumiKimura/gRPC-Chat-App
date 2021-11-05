@@ -14,6 +14,11 @@ import (
 
 type server struct {
 	pb.UnimplementedChatServiceServer
+	clients map[string]pb.ChatService_ChatServer
+}
+
+var s = &server{
+	clients: make(map[string]pb.ChatService_ChatServer),
 }
 
 func main() {
@@ -26,7 +31,9 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterChatServiceServer(grpcServer, &server{})
+	pb.RegisterChatServiceServer(grpcServer, &server{
+		clients: make(map[string]pb.ChatService_ChatServer),
+	})
 
 	if err := grpcServer.Serve(Listen); err != nil {
 		log.Fatalf("Failed to serve %v", err)
@@ -37,11 +44,11 @@ func (s *server) Chat(stream pb.ChatService_ChatServer) error {
 
 	for {
 		req, err := stream.Recv()
+		log.Printf("From: %v, Message: %v", req.Name, req.Message)
+
 		_, ok := s.clients[req.Name]
 		if ok == false {
-
-			fmt.Println(s.clients)
-
+			s.clients[req.Name] = stream
 		}
 		defer delete(s.clients, req.Name)
 

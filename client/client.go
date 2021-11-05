@@ -45,7 +45,9 @@ func main() {
 
 	//go routine for sending
 	go func() {
-		fmt.Println("Now you can chat!\n")
+		fmt.Println("Now you can chat!")
+		fmt.Println("Say something to get connected")
+		fmt.Println("")
 		for {
 			reader := bufio.NewReader(os.Stdin)
 			message, err := reader.ReadString('\n')
@@ -75,6 +77,6 @@ func main() {
 			log.Fatalf("Error when receiving response: %v", err)
 		}
 
-		fmt.Println(res)
+		fmt.Printf("%v ---> %v\n", res.Name, res.Message)
 	}
 }
