@@ -38,7 +38,8 @@ func main() {
 
 	client := pb.NewChatServiceClient(conn)
 
-	stream, err := client.Chat(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	stream, err := client.Chat(ctx)
 	if err != nil {
 		log.Fatalf("Unable to create cilent object %v", err)
 	}
@@ -53,9 +54,14 @@ func main() {
 			message, err := reader.ReadString('\n')
 
 			if err != nil {
-				log.Printf("Failed to read from console :: %v", err)
+				log.Printf("Failed to read from console: %v", err)
 			}
 			message = strings.Trim(message, "\r\n")
+
+			if message == "!exit" {
+				cancel()
+				//os.Exit(0)
+			}
 
 			sendMessage := &pb.Message{
 				Name:    username,
