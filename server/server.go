@@ -44,43 +44,42 @@ func (s *server) Chat(stream pb.ChatService_ChatServer) error {
 
 	for {
 		req, err := stream.Recv()
+		fmt.Println(req)
 
-		if req != nil {
-			fmt.Println(req)
-			_, ok := s.clients[req.Name]
-			if ok == false {
-				s.clients[req.Name] = stream
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			log.Fatalf("Error while reading the stream %v", err)
+		}
+		_, ok := s.clients[req.Name]
+		if ok == false {
+			s.clients[req.Name] = stream
+		}
+		defer delete(s.clients, req.Name)
+		fmt.Println(req)
+		fmt.Println(s.clients)
+
+		for name, client := range s.clients {
+
+			responseMessage := &pb.Message{
+				Name:    req.Name,
+				Message: req.Message,
 			}
-			defer delete(s.clients, req.Name)
 
-			if err == io.EOF {
-				return nil
+			var res error
+			if name != req.Name {
+				res = client.Send(responseMessage)
 			}
 
-			if err != nil {
-				log.Fatalf("Error while reading the stream %v", err)
+			if req.Message == "!exit" {
+				delete(s.clients, req.Name)
 			}
 
-			for name, client := range s.clients {
-
-				responseMessage := &pb.Message{
-					Name:    req.Name,
-					Message: req.Message,
-				}
-
-				var res error
-				if name != req.Name {
-					res = client.Send(responseMessage)
-				}
-
-				if req.Message == "!exit" {
-					delete(s.clients, req.Name)
-				}
-
-				if res != nil {
-					log.Fatalf("Error when sending response from server %v", res)
-				}
+			if res != nil {
+				log.Fatalf("Error when sending response from server %v", res)
 			}
+
 		}
 	}
 }

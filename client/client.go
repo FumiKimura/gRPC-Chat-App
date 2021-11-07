@@ -14,7 +14,28 @@ import (
 	"google.golang.org/grpc"
 )
 
-func main() {
+var waitChannel = make(chan struct{})
+
+func receiveMessage(stream pb.ChatService_ChatClient) {
+
+	for {
+		res, err := stream.Recv()
+
+		if err == io.EOF {
+			close(waitChannel)
+			break
+		}
+
+		if err != nil {
+			log.Fatalf("Error when receiving response: %v", err)
+		}
+
+		fmt.Printf("%v ---> %v\n", res.Name, res.Message)
+	}
+
+}
+
+func sendMessage(stream pb.ChatService_ChatClient) {
 	fmt.Println("Starting client.....")
 	fmt.Print("Please enter your username: ")
 	reader := bufio.NewReader(os.Stdin)
@@ -24,6 +45,36 @@ func main() {
 		log.Printf("Failed to read from console :: %v", err)
 	}
 	username = strings.Trim(username, "\r\n")
+
+	fmt.Println("Now you can chat!")
+	fmt.Println("Say something to get connected")
+	fmt.Println("")
+
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		message := scanner.Text()
+
+		if message == "!exit" {
+			err := stream.CloseSend()
+			if err != nil {
+				log.Fatalf("Failed to exit properly", err)
+			}
+			break
+		}
+
+		err := stream.Send(&pb.Message{
+			Name:    username,
+			Message: message,
+		})
+
+		if err != nil {
+			log.Fatal("Failed to send message to server", err)
+		}
+	}
+	<-waitChannel
+}
+
+func main() {
 
 	PORT := 8080
 	URL := "localhost:"
@@ -37,52 +88,15 @@ func main() {
 	defer conn.Close()
 
 	client := pb.NewChatServiceClient(conn)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	stream, err := client.Chat(ctx)
+	stream, err := client.Chat(context.Background())
 	if err != nil {
 		log.Fatalf("Unable to create cilent object %v", err)
 	}
+	defer stream.CloseSend()
 
-	//go routine for sending
-	go func() {
-		fmt.Println("Now you can chat!")
-		fmt.Println("Say something to get connected")
-		fmt.Println("")
-		for {
-			reader := bufio.NewReader(os.Stdin)
-			message, err := reader.ReadString('\n')
+	//go routine for receiving message from server
+	go receiveMessage(stream)
 
-			if err != nil {
-				log.Printf("Failed to read from console: %v", err)
-			}
-			message = strings.Trim(message, "\r\n")
-
-			if message == "!exit" {
-				cancel()
-				//os.Exit(0)
-			}
-
-			sendMessage := &pb.Message{
-				Name:    username,
-				Message: message,
-			}
-			stream.Send(sendMessage)
-		}
-	}()
-
-	//for loop to receive message
-	for {
-		res, err := stream.Recv()
-
-		if err == io.EOF {
-			break
-		}
-
-		if err != nil {
-			log.Fatalf("Error when receiving response: %v", err)
-		}
-
-		fmt.Printf("%v ---> %v\n", res.Name, res.Message)
-	}
+	//sending message from client
+	sendMessage(stream)
 }
