@@ -70,7 +70,3 @@ Open another terminal and run client application. Yay there should be messages b
 ### 5. Exiting client application
 
 In the client side app, input following !exit to quit client application. I have not implemented my code to hand Ctrl + C (Termination Signal) yet. This is something I will keep on working. If you have any suggestions, please kindly reach out.
-
-## Example of Successful Run
-
-![Untitled](Golang%20+%20gRPC%20Terminal%20Chat%20App%207ae73e2e279b413c84a0b92570525c5e/Untitled.png)
