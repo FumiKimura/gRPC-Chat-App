@@ -57,8 +57,6 @@ func (s *server) Chat(stream pb.ChatService_ChatServer) error {
 			s.clients[req.Name] = stream
 		}
 		defer delete(s.clients, req.Name)
-		fmt.Println(req)
-		fmt.Println(s.clients)
 
 		for name, client := range s.clients {
 
