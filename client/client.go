@@ -7,14 +7,20 @@ import (
 	"io"
 	"log"
 	"os"
-	"strconv"
-	"strings"
 
 	pb "github.com/FumiKimura/ccp2-project-polygottal/proto"
 	"google.golang.org/grpc"
 )
 
 var waitChannel = make(chan struct{})
+
+func argsCheck() bool {
+	if len(os.Args) != 3 {
+		fmt.Println("You need: 1st Arg = URL, 2nd Arg = Username")
+		return false
+	}
+	return true
+}
 
 func receiveMessage(stream pb.ChatService_ChatClient) {
 
@@ -35,17 +41,7 @@ func receiveMessage(stream pb.ChatService_ChatClient) {
 
 }
 
-func sendMessage(stream pb.ChatService_ChatClient) {
-	fmt.Println("Starting client.....")
-	fmt.Print("Please enter your username: ")
-	reader := bufio.NewReader(os.Stdin)
-	username, err := reader.ReadString('\n')
-
-	if err != nil {
-		log.Printf("Failed to read from console :: %v", err)
-	}
-	username = strings.Trim(username, "\r\n")
-
+func sendMessage(stream pb.ChatService_ChatClient, username string) {
 	fmt.Println("===============================")
 	fmt.Println("Say something to get connected")
 	fmt.Println("Enter !exit to exit from chat")
@@ -78,11 +74,14 @@ func sendMessage(stream pb.ChatService_ChatClient) {
 
 func main() {
 
-	PORT := 8080
-	URL := "localhost:"
+	ok := argsCheck()
+	if !ok {
+		return
+	}
 
+	URL := os.Args[1]
 	opts := grpc.WithInsecure()
-	conn, err := grpc.Dial(URL+strconv.Itoa(PORT), opts)
+	conn, err := grpc.Dial(URL, opts)
 
 	if err != nil {
 		log.Fatalf("Unable to establish connection %v", err)
@@ -100,5 +99,5 @@ func main() {
 	go receiveMessage(stream)
 
 	//sending message from client
-	sendMessage(stream)
+	sendMessage(stream, os.Args[2])
 }
