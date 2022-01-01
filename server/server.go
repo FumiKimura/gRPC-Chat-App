@@ -6,19 +6,12 @@ import (
 	"log"
 	"net"
 	"os"
+	"strconv"
 
 	"google.golang.org/grpc"
 
 	pb "github.com/FumiKimura/ccp2-project-polygottal/proto"
-	"github.com/joho/godotenv"
 )
-
-func envLoad() {
-	err := godotenv.Load("./../.env")
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
-}
 
 type server struct {
 	pb.UnimplementedChatServiceServer
@@ -30,10 +23,9 @@ var s = &server{
 }
 
 func main() {
-	envLoad()
 
-	PORT := os.Getenv("PORT")
-	Listen, err := net.Listen("tcp", ":"+PORT)
+	PORT, _ := strconv.Atoi(os.Args[1])
+	Listen, err := net.Listen("tcp", ":"+strconv.Itoa(PORT))
 	fmt.Println("Started Listening to port:", PORT)
 
 	if err != nil {
