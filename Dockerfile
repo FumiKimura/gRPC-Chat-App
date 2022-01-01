@@ -1,6 +1,5 @@
 FROM golang:1.17
-RUN mkdir /src
-WORKDIR ./src
+WORKDIR /
 COPY . . 
 RUN go mod download
 EXPOSE 8080

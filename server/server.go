@@ -32,9 +32,9 @@ var s = &server{
 func main() {
 	envLoad()
 
-	fmt.Println("Started Listening to server...")
 	PORT := os.Getenv("PORT")
 	Listen, err := net.Listen("tcp", ":"+PORT)
+	fmt.Println("Started Listening to port:", PORT)
 
 	if err != nil {
 		log.Fatalf("Unable to establish connection to")
