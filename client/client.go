@@ -46,9 +46,10 @@ func sendMessage(stream pb.ChatService_ChatClient) {
 	}
 	username = strings.Trim(username, "\r\n")
 
-	fmt.Println("Now you can chat!")
+	fmt.Println("===============================")
 	fmt.Println("Say something to get connected")
-	fmt.Println("")
+	fmt.Println("Enter !exit to exit from chat")
+	fmt.Println("===============================")
 
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
@@ -72,6 +73,7 @@ func sendMessage(stream pb.ChatService_ChatClient) {
 		}
 	}
 	<-waitChannel
+	fmt.Println("========See you later!!========")
 }
 
 func main() {
