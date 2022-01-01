@@ -22,26 +22,6 @@ var s = &server{
 	clients: make(map[string]pb.ChatService_ChatServer),
 }
 
-func main() {
-
-	PORT, _ := strconv.Atoi(os.Args[1])
-	Listen, err := net.Listen("tcp", ":"+strconv.Itoa(PORT))
-	fmt.Println("Started Listening to port:", PORT)
-
-	if err != nil {
-		log.Fatalf("Unable to establish connection to")
-	}
-
-	grpcServer := grpc.NewServer()
-	pb.RegisterChatServiceServer(grpcServer, &server{
-		clients: make(map[string]pb.ChatService_ChatServer),
-	})
-
-	if err := grpcServer.Serve(Listen); err != nil {
-		log.Fatalf("Failed to serve %v", err)
-	}
-}
-
 func (s *server) Chat(stream pb.ChatService_ChatServer) error {
 
 	for {
@@ -81,5 +61,25 @@ func (s *server) Chat(stream pb.ChatService_ChatServer) error {
 			}
 
 		}
+	}
+}
+
+func main() {
+
+	PORT, _ := strconv.Atoi(os.Args[1])
+	Listen, err := net.Listen("tcp", ":"+strconv.Itoa(PORT))
+	fmt.Println("Started Listening to port:", PORT)
+
+	if err != nil {
+		log.Fatalf("Unable to establish connection to")
+	}
+
+	grpcServer := grpc.NewServer()
+	pb.RegisterChatServiceServer(grpcServer, &server{
+		clients: make(map[string]pb.ChatService_ChatServer),
+	})
+
+	if err := grpcServer.Serve(Listen); err != nil {
+		log.Fatalf("Failed to serve %v", err)
 	}
 }
