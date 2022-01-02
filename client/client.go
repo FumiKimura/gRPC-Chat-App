@@ -45,7 +45,10 @@ func receiveMessage(stream pb.ChatService_ChatClient) {
 
 func sendMessage(stream pb.ChatService_ChatClient, username string) {
 	fmt.Println("===============================")
+	fmt.Println("WELCOME TO GRPC CHAT SERVER!!!")
+	fmt.Println("===============================")
 	fmt.Println("Say something to get connected")
+	fmt.Println("===============================")
 	fmt.Println("Enter !exit to exit from chat")
 	fmt.Println("===============================")
 
