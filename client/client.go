@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"log"
@@ -10,6 +11,7 @@ import (
 
 	pb "github.com/FumiKimura/ccp2-project-polygottal/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 var waitChannel = make(chan struct{})
@@ -80,8 +82,8 @@ func main() {
 	}
 
 	URL := os.Args[1]
-	opts := grpc.WithInsecure()
-	conn, err := grpc.Dial(URL, opts)
+	tlsCredentials := credentials.NewTLS(&tls.Config{})
+	conn, err := grpc.Dial(URL, grpc.WithTransportCredentials(tlsCredentials), grpc.WithBlock())
 
 	if err != nil {
 		log.Fatalf("Unable to establish connection %v", err)

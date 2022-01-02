@@ -7,8 +7,10 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"crypto/tls"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 
 	pb "github.com/FumiKimura/ccp2-project-polygottal/proto"
 )
