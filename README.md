@@ -2,6 +2,16 @@
 
 This was two weeks long project during part-time immersive bootcamp. The main objective was to learn completely new programming language, first programming language was JavaScript, and create application
 
+## This is Now deployed to Cloud Run on GCP
+
+You can access this gRPC-chat server via:
+
+```bash
+go run ./client/client.go ccp2-project-polygottal-x5vzynu2oa-an.a.run.app:443 <username>
+```
+
+When you cloned the project to local directory make sure to download libraries.
+
 ## Language Requirements
 
 - It must be a language you have never used before
